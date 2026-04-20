@@ -273,10 +273,11 @@ const startAutoplay = () => {
   if (autoplayButton) {
     autoplayButton.textContent = 'Starting...';
   }
-  document.querySelectorAll('video').forEach(video => {
-    video.muted = false;
-    video.play().catch(() => {});
-  });
+  const videoBg = document.querySelector('.video-bg');
+  if (videoBg) {
+    videoBg.muted = false;
+    videoBg.play().catch(() => {});
+  }
   tryFinishLoading();
 };
 
