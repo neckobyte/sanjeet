@@ -229,14 +229,29 @@ gsap.from('.collage-card', {
   }
 });
 
-    window.addEventListener('load', () => {
-      const loader = document.querySelector('.loading-screen');
-      if (loader) {
-        loader.style.opacity = '0';
-        loader.style.pointerEvents = 'none';
-        setTimeout(() => loader.remove(), 600);
-      }
-    });
+// loading screen
+const loader = document.querySelector('.loading-screen');
+
+Promise.all([
+  // wait for all images
+  ...Array.from(document.querySelectorAll('img')).map(img =>
+    img.complete ? Promise.resolve() : new Promise(res => {
+      img.addEventListener('load', res);
+      img.addEventListener('error', res); // don't hang on broken images
+    })
+  ),
+  // wait for all videos to have enough data
+  ...Array.from(document.querySelectorAll('video')).map(video =>
+    video.readyState >= 3 ? Promise.resolve() : new Promise(res => {
+      video.addEventListener('canplaythrough', res);
+      video.addEventListener('error', res);
+    })
+  ),
+]).then(() => {
+  loader.style.opacity = '0';
+  loader.style.pointerEvents = 'none';
+  setTimeout(() => loader.remove(), 600);
+});
   </script>
 
   <!-- custom cursor -->
