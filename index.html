@@ -274,7 +274,7 @@ const startAutoplay = () => {
     autoplayButton.textContent = 'Starting...';
   }
   document.querySelectorAll('video').forEach(video => {
-    video.muted = true;
+    video.muted = false;
     video.play().catch(() => {});
   });
   tryFinishLoading();
