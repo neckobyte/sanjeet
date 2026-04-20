@@ -21,6 +21,7 @@
         </div>
         <span class="progress-text">0%</span>
       </div>
+      <button class="start-autoplay-button" type="button" disabled>Enable Autoplay</button>
       <p>Loading memories...</p>
     </div>
   </div>
@@ -237,17 +238,49 @@ gsap.from('.collage-card', {
 
 // loading screen
 const loader = document.querySelector('.loading-screen');
+const autoplayButton = document.querySelector('.start-autoplay-button');
 const progressFill = document.querySelector('.progress-fill');
 const progressText = document.querySelector('.progress-text');
 const assets = [...document.querySelectorAll('img'), ...document.querySelectorAll('video')];
 const totalAssets = assets.length;
 let loadedCount = 0;
+let assetsReady = false;
+let userStarted = false;
 
 const updateProgress = () => {
   const percent = totalAssets ? Math.min(100, Math.round((loadedCount / totalAssets) * 100)) : 100;
   if (progressFill) progressFill.style.width = `${percent}%`;
   if (progressText) progressText.textContent = `${percent}%`;
 };
+
+const tryFinishLoading = () => {
+  if (!loader) return;
+  if (assetsReady && userStarted) {
+    loader.style.opacity = '0';
+    loader.style.pointerEvents = 'none';
+    setTimeout(() => loader.remove(), 600);
+  }
+};
+
+const enableButton = () => {
+  if (!autoplayButton) return;
+  autoplayButton.disabled = false;
+  autoplayButton.textContent = 'Start Autoplay';
+};
+
+const startAutoplay = () => {
+  userStarted = true;
+  if (autoplayButton) {
+    autoplayButton.textContent = 'Starting...';
+  }
+  document.querySelectorAll('video').forEach(video => {
+    video.muted = true;
+    video.play().catch(() => {});
+  });
+  tryFinishLoading();
+};
+
+autoplayButton?.addEventListener('click', startAutoplay);
 
 assets.forEach(asset => {
   if (asset.tagName === 'IMG') {
@@ -294,12 +327,10 @@ const assetPromises = assets.map(asset => {
 updateProgress();
 
 Promise.all(assetPromises).then(() => {
-  updateProgress();
-  if (loader) {
-    loader.style.opacity = '0';
-    loader.style.pointerEvents = 'none';
-    setTimeout(() => loader.remove(), 600);
-  }
+  assetsReady = true;
+  enableButton();
+  if (progressText) progressText.textContent = 'Ready';
+  tryFinishLoading();
 });
   </script>
 
